@@ -1,3 +1,4 @@
+import * as crypto from 'crypto'
 import { once } from 'events'
 import { type IncomingMessage } from 'http'
 import { requestRetryLogger } from '@pnpm/core-loggers'
@@ -7,11 +8,11 @@ import type { Cafs, DeferredManifestPromise } from '@pnpm/cafs-types'
 import { type FetchFromRegistry } from '@pnpm/fetching-types'
 import * as retry from '@zkochan/retry'
 import throttle from 'lodash.throttle'
-import ssri from 'ssri'
 import { Readable } from 'stream'
 import { BadTarballError } from './errorTypes'
 
 const BIG_TARBALL_SIZE = 1024 * 1024 * 5 // 5 MB
+const INTEGRITY_REGEX: RegExp = /^([^-]+)-([A-Za-z0-9+/=]+)$/
 
 export class TarballIntegrityError extends PnpmError {
   public readonly found: string
@@ -192,16 +193,15 @@ export function createDownloader (
 
           try {
             if (opts.integrity) {
-              try {
-                ssri.checkData(data, opts.integrity, { error: true })
-              } catch (err: any) { // eslint-disable-line
-                throw new TarballIntegrityError({
-                  algorithm: err.algorithm,
-                  expected: err.expected,
-                  found: err.found,
-                  sri: err.sri,
-                  url,
-                })
+              const [, algo, integrityHash] = opts.integrity.match(INTEGRITY_REGEX)!
+              // Compensate for the possibility of non-uniform Base64 padding
+              const normalizedRemoteHash: string = Buffer.from(integrityHash, 'base64').toString('hex')
+
+              const calculatedHash: string = crypto.createHash(algo).update(data).digest('hex')
+              if (calculatedHash !== normalizedRemoteHash) {
+                throw new Error(
+                  `integrity validation failed:\nintegrity: ${opts.integrity}\nexpected: ${normalizedRemoteHash}\nreceived: ${calculatedHash}`
+                )
               }
             }
             const streamForTarball = new Readable({
