@@ -28,6 +28,7 @@ export async function checkForUpdates (config: Config) {
   const resolve = createResolver({
     ...config,
     authConfig: config.rawConfig,
+    cafsDir: path.join(config.storeDir!, 'files'),
     retry: {
       retries: 0,
     },

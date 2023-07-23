@@ -9,6 +9,7 @@ import {
   type GetAuthHeader,
   type RetryTimeoutOptions,
 } from '@pnpm/fetching-types'
+import { WorkerPool } from '@rushstack/worker-pool/lib/WorkerPool'
 import {
   createDownloader,
   type DownloadFunction,
@@ -31,6 +32,7 @@ export function createTarballFetcher (
   fetchFromRegistry: FetchFromRegistry,
   getAuthHeader: GetAuthHeader,
   opts: {
+    cafsDir: string
     rawConfig: object
     unsafePerm?: boolean
     ignoreScripts?: boolean
@@ -39,7 +41,16 @@ export function createTarballFetcher (
     offline?: boolean
   }
 ): TarballFetchers {
-  const download = createDownloader(fetchFromRegistry, {
+  const workerPool = new WorkerPool({
+    id: 'tarball',
+    maxWorkers: 16,
+    workerScriptPath: '/Users/zoltan/src/pnpm/pnpm/fetching/tarball-fetcher/lib/worker/tarballWorker.js',
+  })
+  // @ts-ignore
+  global.finishWorkers = () => {
+    workerPool.finishAsync()
+  }
+  const download = createDownloader(workerPool, opts.cafsDir, fetchFromRegistry, {
     retry: opts.retry,
     timeout: opts.timeout,
   })

@@ -1552,6 +1552,9 @@ importers:
 
   fetching/tarball-fetcher:
     dependencies:
+      '@pnpm/cafs':
+        specifier: workspace:*
+        version: link:../../store/cafs
       '@pnpm/core-loggers':
         specifier: workspace:*
         version: link:../../packages/core-loggers
@@ -1573,6 +1576,9 @@ importers:
       '@pnpm/prepare-package':
         specifier: workspace:*
         version: link:../../exec/prepare-package
+      '@rushstack/worker-pool':
+        specifier: 0.3.34
+        version: 0.3.34(@types/node@14.18.53)
       '@zkochan/retry':
         specifier: ^0.2.0
         version: 0.2.0
@@ -1589,9 +1595,6 @@ importers:
         specifier: 10.0.4
         version: 10.0.4
     devDependencies:
-      '@pnpm/cafs':
-        specifier: workspace:*
-        version: link:../../store/cafs
       '@pnpm/cafs-types':
         specifier: workspace:*
         version: link:../../store/cafs-types
@@ -7716,7 +7719,7 @@ packages:
       decompress-maybe: 1.1.0
       get-stream: 6.0.1
       p-limit: 3.1.0
-      path-temp: 2.0.0
+      path-temp: 2.1.0
       rename-overwrite: 4.0.3
       ssri: 10.0.1
       strip-bom: 4.0.0
@@ -8506,7 +8509,7 @@ packages:
       p-limit: 3.1.0
       p-memoize: 4.0.1
       parse-npm-tarball-url: 3.0.0
-      path-temp: 2.0.0
+      path-temp: 2.1.0
       ramda: /@pnpm/ramda@0.28.1
       rename-overwrite: 4.0.3
       semver: 7.5.4
@@ -8589,7 +8592,7 @@ packages:
       p-limit: 3.1.0
       p-map-values: 1.0.0
       p-queue: 6.6.2
-      path-temp: 2.0.0
+      path-temp: 2.1.0
       promise-share: 1.0.0
       ramda: /@pnpm/ramda@0.28.1
       rename-overwrite: 4.0.3
@@ -8961,6 +8964,17 @@ packages:
       write-file-atomic: 5.0.1
       write-yaml-file: 4.2.0
     dev: true
+
+  /@rushstack/worker-pool@0.3.34(@types/node@14.18.53):
+    resolution: {integrity: sha512-ZpIrJUk539uQrsmbcnoMxhrM6/Lq0qCEL1QL9l8cj2RSq1qHwZ9lGIvd+pRmN8uEQSxL9k5fSnE6LasIzcKC3Q==}
+    peerDependencies:
+      '@types/node': '*'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+    dependencies:
+      '@types/node': 14.18.53
+    dev: false
 
   /@sinclair/typebox@0.27.8:
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
@@ -15188,7 +15202,6 @@ packages:
     engines: {node: '>=8.15'}
     dependencies:
       unique-string: 2.0.0
-    dev: false
 
   /path-to-regexp@0.1.7:
     resolution: {integrity: sha512-5DFkuoqlv1uYQKxy8omFBeJPQcdoE07Kv2sferDCrAq1ohOU+MSDswDIbnx3YAM60qIOnYa53wBhXW0EbMonrQ==}

@@ -293,6 +293,8 @@ export async function main (inputArgv: string[]) {
     }
     return result
   })()
+  // @ts-expect-error
+  global.finishWorkers()
   if (output) {
     if (!output.endsWith('\n')) {
       output = `${output}\n`

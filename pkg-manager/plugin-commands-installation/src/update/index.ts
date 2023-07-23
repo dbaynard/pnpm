@@ -1,3 +1,4 @@
+import path from 'path'
 import {
   docsUrl,
   readDepNameCompletions,
@@ -191,6 +192,7 @@ async function interactiveUpdate (
   const rootProject = projects.find((project) => project.dir === rootDir)
   const outdatedPkgsOfProjects = await outdatedDepsOfProjects(projects, input, {
     ...opts,
+    cafsDir: path.join(opts.storeDir!, 'files'),
     compatible: opts.latest !== true,
     ignoreDependencies: rootProject?.manifest?.pnpm?.updateConfig?.ignoreDependencies,
     include,

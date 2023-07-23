@@ -17,6 +17,7 @@ export type PublishRecursiveOpts = Required<Pick<Config,
 | 'dir'
 | 'rawConfig'
 | 'registries'
+| 'storeDir'
 | 'workspaceDir'
 >> &
 Partial<Pick<Config,
@@ -61,6 +62,7 @@ export async function recursivePublish (
   const resolve = createResolver({
     ...opts,
     authConfig: opts.rawConfig,
+    cafsDir: path.join(opts.storeDir, 'files'),
     userConfig: opts.userConfig,
     retry: {
       factor: opts.fetchRetryFactor,

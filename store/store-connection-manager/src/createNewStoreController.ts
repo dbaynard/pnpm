@@ -1,4 +1,5 @@
 import { promises as fs } from 'fs'
+import path from 'path'
 import { createClient, type ClientOptions } from '@pnpm/client'
 import { type Config } from '@pnpm/config'
 import { createPackageStore } from '@pnpm/package-store'
@@ -50,6 +51,7 @@ export async function createNewStoreController (
 ) {
   const fullMetadata = opts.resolutionMode === 'time-based' && !opts.registrySupportsTimeField
   const { resolve, fetchers } = createClient({
+    cafsDir: path.join(opts.storeDir, 'files'),
     customFetchers: opts.hooks?.fetchers,
     userConfig: opts.userConfig,
     unsafePerm: opts.unsafePerm,

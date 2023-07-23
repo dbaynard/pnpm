@@ -16,6 +16,7 @@ export type { ResolveFunction }
 
 export type ClientOptions = {
   authConfig: Record<string, string>
+  cafsDir: string
   customFetchers?: CustomFetchers
   ignoreScripts?: boolean
   rawConfig: object
@@ -57,7 +58,7 @@ type Fetchers = {
 function createFetchers (
   fetchFromRegistry: FetchFromRegistry,
   getAuthHeader: GetAuthHeader,
-  opts: Pick<ClientOptions, 'rawConfig' | 'retry' | 'gitShallowHosts' | 'resolveSymlinksInInjectedDirs' | 'unsafePerm' | 'includeOnlyPackageFiles'>,
+  opts: Pick<ClientOptions, 'cafsDir' | 'rawConfig' | 'retry' | 'gitShallowHosts' | 'resolveSymlinksInInjectedDirs' | 'unsafePerm' | 'includeOnlyPackageFiles'>,
   customFetchers?: CustomFetchers
 ): Fetchers {
   const defaultFetchers = {

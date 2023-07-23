@@ -6,6 +6,7 @@ import { FetchError, PnpmError } from '@pnpm/error'
 import { type FetchResult } from '@pnpm/fetcher-base'
 import type { Cafs, DeferredManifestPromise } from '@pnpm/cafs-types'
 import { type FetchFromRegistry } from '@pnpm/fetching-types'
+import { type WorkerPool } from '@rushstack/worker-pool/lib/WorkerPool'
 import * as retry from '@zkochan/retry'
 import throttle from 'lodash.throttle'
 import { Readable } from 'stream'
@@ -68,6 +69,8 @@ export interface NpmRegistryClient {
 }
 
 export function createDownloader (
+  pool: WorkerPool,
+  cafsDir: string,
   fetchFromRegistry: FetchFromRegistry,
   gotOpts: {
     // retry
@@ -184,12 +187,13 @@ export function createDownloader (
             reject(err)
             return
           }
-          const data: Buffer = Buffer.from(new ArrayBuffer(downloaded))
+          const data: Buffer = Buffer.from(new SharedArrayBuffer(downloaded))
           let offset: number = 0
           for (const chunk of chunks) {
             chunk.copy(data, offset)
             offset += chunk.length
           }
+          const localWorker = await pool.checkoutWorkerAsync(true)
 
           try {
             if (opts.integrity) {
@@ -204,14 +208,20 @@ export function createDownloader (
                 )
               }
             }
-            const streamForTarball = new Readable({
-              read () {
-                this.push(data)
-                this.push(null)
-              },
+            localWorker.once('message', ({ status, error, value }) => {
+              pool.checkinWorker(localWorker)
+              if (status == 'error') {
+                reject(error)
+                return
+              }
+              opts.manifest?.resolve(value.manifest)
+              resolve({ filesIndex: value.filesIndex, local: true })
             })
-            const filesIndex = await opts.cafs.addFilesFromTarball(streamForTarball, opts.manifest)
-            resolve({ filesIndex })
+            localWorker.postMessage({
+              type: 'extract',
+              buffer: data,
+              cafsDir,
+            })
           } catch (err: any) { // eslint-disable-line
             // If the error is not an integrity check error, then it happened during extracting the tarball
             if (
